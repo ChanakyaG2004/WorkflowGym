@@ -189,9 +189,17 @@ def run_demo() -> dict[str, object]:
                     "customer": scenario.customer_name,
                     "month": scenario.month,
                     "test_prompt": scenario.prompt,
-                    "data_source_type": "synthetic",
-                    "data_source_label": "Synthetic WorkflowGym benchmark fixture",
-                    "data_source_url": None,
+                    "data_source_type": "real_public_reference_plus_synthetic_invoice",
+                    "data_source_label": (
+                        "AWS API Gateway pricing reference; synthetic "
+                        "customer, usage, invoice, and hidden-error fixture"
+                    ),
+                    "data_source_url": "https://aws.amazon.com/api-gateway/pricing/",
+                    "real_source_facts": [
+                        "AWS API Gateway charges for API calls received and data transferred out.",
+                        "AWS REST API pricing examples use $3.50 per million API calls.",
+                        "AWS API Gateway pricing examples use $0.09 per GB for data transfer.",
+                    ],
                     "expected_outcome": scenario.expected_outcome,
                     "expected_cause": scenario.hidden_cause,
                     "decision": run.final_answer["decision"] if run.final_answer else None,

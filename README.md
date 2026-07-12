@@ -67,7 +67,25 @@ The benchmark covers:
 
 ## Data Provenance
 
-The current 20 benchmark scenarios are **synthetic WorkflowGym fixtures**. They do not use private real customer invoices or confidential company billing records.
+The current 20 benchmark scenarios use a **real public pricing reference plus synthetic benchmark invoices**.
+
+Real public source:
+
+- AWS API Gateway pricing: https://aws.amazon.com/api-gateway/pricing/
+
+Real facts used as benchmark context:
+
+- API Gateway charges for API calls received and data transferred out.
+- AWS REST API pricing examples use `$3.50 per million API calls`.
+- AWS API Gateway pricing examples use `$0.09 per GB` for data transfer.
+
+Synthetic parts:
+
+- customer names
+- usage volumes
+- invoice line items
+- injected billing errors
+- hidden ground truth labels
 
 Why synthetic data:
 
@@ -75,7 +93,7 @@ Why synthetic data:
 - Hidden ground truth needs to be controlled so the evaluator can score runs deterministically.
 - Synthetic fixtures let the benchmark safely test known billing failure modes.
 
-Public real-world sources that could be integrated in a future version:
+Additional public real-world sources that could be integrated in a future version:
 
 - SEC EDGAR APIs for public company filings and financial facts: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
 - AWS Price List Bulk API for public cloud pricing data: https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html
