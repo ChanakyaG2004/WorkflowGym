@@ -77,10 +77,10 @@ For a production-grade version, replace startup `create_all` with Alembic migrat
 
 After deployment:
 
-1. Open `/health`.
-2. Open `/docs`.
-3. Run `POST /scenarios/duplicate_usage_001/run`.
-4. Open `GET /runs/{run_id}`.
+1. Open `/` for the human-friendly UI.
+2. Click `Run Live Demo`.
+3. Open `/docs` for the API surface.
+4. Run `POST /scenarios/duplicate_usage_001/run` for the raw API flow.
 5. Open `GET /metrics/summary`.
 6. Show the tool trace, evaluator result, 100% pass rate, 100 score, 5/5 required tools called, 5 stored tool calls, 50,000 duplicate calls detected, and $2,000 overcharge detected.
 

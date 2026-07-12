@@ -72,7 +72,13 @@ GET  /metrics/summary
 GET  /demo
 ```
 
-Interactive docs are available at:
+Live demo:
+
+```text
+https://workflowgym.vercel.app
+```
+
+Interactive API docs are available at:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -224,7 +230,7 @@ The root [Dockerfile](Dockerfile) is a lightweight public-demo container for Hug
 
 The [vercel.json](vercel.json) and [api/index.py](api/index.py) files support a lightweight Vercel demo with SQLite in `/tmp`.
 
-For serverless demos, use:
+For raw serverless demo JSON, use:
 
 ```text
 https://workflowgym.vercel.app/demo

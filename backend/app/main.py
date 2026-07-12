@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
@@ -16,6 +17,7 @@ from app.schemas.metrics import MetricsSummary
 from app.schemas.run import AgentRunRead
 from app.schemas.scenario import ScenarioRead
 from app.seed.seed_acme import seed_acme, seed_acme_if_missing
+from app.ui import render_home_page
 
 
 @asynccontextmanager
@@ -40,6 +42,12 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.get("/", include_in_schema=False)
+def home() -> HTMLResponse:
+    """Serve the human-friendly project demo page."""
+    return render_home_page()
 
 
 @app.get("/health")

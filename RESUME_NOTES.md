@@ -6,7 +6,9 @@ WorkflowGym: Tool-Using AI Agent Evaluation Platform
 
 GitHub: https://github.com/ChanakyaG2004/WorkflowGym
 
-Live demo: https://workflowgym.vercel.app/demo
+Live demo: https://workflowgym.vercel.app
+
+Raw API demo: https://workflowgym.vercel.app/demo
 
 ## Short Description
 
