@@ -85,3 +85,21 @@ After deployment:
 6. Show the tool trace, evaluator result, 100% pass rate, 100 score, 5/5 required tools called, 5 stored tool calls, 50,000 duplicate calls detected, and $2,000 overcharge detected.
 
 That flow demonstrates the core resume value of the project: tool-using agent evaluation with traceability.
+
+## Hugging Face Demo Note
+
+The root [Dockerfile](Dockerfile) is for a lightweight public Hugging Face Spaces demo. It runs the same FastAPI app with SQLite and `AUTO_SEED_DEMO=true`.
+
+Use the Render/PostgreSQL path for the stronger production-style deployment.
+
+## Vercel Demo
+
+The [api/index.py](api/index.py), [requirements.txt](requirements.txt), and [vercel.json](vercel.json) files support a lightweight Vercel demo deployment.
+
+This demo uses SQLite in `/tmp` and auto-seeded data, so it is best for public API exploration rather than persistent production storage.
+
+Deploy:
+
+```bash
+npx vercel --prod
+```
