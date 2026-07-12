@@ -1,0 +1,240 @@
+# WorkflowGym
+
+WorkflowGym is a full-stack project foundation for testing tool-using AI agents in simulated business workflows.
+
+The current MVP is a backend-only FinanceOps simulator. A rule-based agent investigates why Acme AI's June 2026 invoice is too high, calls deterministic finance tools, stores a tool-call trace, and gets evaluated against hidden ground truth.
+
+## Resume Summary
+
+WorkflowGym demonstrates:
+
+- FastAPI backend architecture
+- PostgreSQL persistence with SQLAlchemy ORM
+- Deterministic tool interface for agent workflows
+- Trace storage for every tool call
+- Hidden-ground-truth evaluation
+- Quantified evaluation metrics: score, pass rate, tool accuracy, tool-call count, run duration, duplicate usage detected, and overcharge detected
+- Dockerized local deployment
+- API-first design ready for a future React dashboard
+
+## Current Scenario
+
+```text
+Scenario: duplicate_usage_001
+Customer: Acme AI
+Month: 2026-06
+Complaint: June invoice is too high
+Hidden cause: duplicate usage events
+Expected outcome: invoice_incorrect
+```
+
+Billing facts:
+
+- Contract includes 100,000 API calls.
+- Overage costs 4 cents per API call.
+- Valid June usage was 150,000 API calls.
+- Duplicate June usage added another 50,000 API calls.
+- Invoice incorrectly charged for 200,000 total calls.
+- Correct billable overage is 50,000 calls.
+- Actual charged overage is 100,000 calls.
+
+## Architecture
+
+```text
+backend/app/
+  main.py                  FastAPI app and API routes
+  db/
+    database.py            SQLAlchemy engine/session setup
+    models.py              ORM models
+    init_db.py             create_all helper
+  seed/
+    seed_acme.py           Acme AI seed data
+  tools/
+    finance_tools.py       deterministic finance tools
+  agents/
+    rule_based_agent.py    first deterministic agent runner
+  evaluation/
+    evaluator.py           hidden-ground-truth evaluator
+  schemas/
+    scenario.py            scenario response schema
+    run.py                 run/trace/evaluation response schemas
+```
+
+## API Endpoints
+
+```text
+GET  /health
+GET  /scenarios
+POST /scenarios/{scenario_id}/run
+GET  /runs
+GET  /runs/{run_id}
+GET  /metrics/summary
+```
+
+Interactive docs are available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## Run With Docker Compose
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+In another terminal, seed the demo data:
+
+```bash
+docker compose exec api python -m app.seed.seed_acme
+```
+
+Run the scenario:
+
+```bash
+curl -X POST http://127.0.0.1:8000/scenarios/duplicate_usage_001/run
+```
+
+Fetch all runs:
+
+```bash
+curl http://127.0.0.1:8000/runs
+```
+
+## Local Development
+
+From `backend/`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Set up PostgreSQL so this URL works:
+
+```text
+postgresql+psycopg://workflowgym:workflowgym@localhost:5432/workflowgym
+```
+
+Then run:
+
+```bash
+python -m app.seed.seed_acme
+uvicorn app.main:app --reload
+```
+
+## Smoke Test
+
+The smoke test seeds Acme AI, runs the scenario, evaluates it, and fails if the expected result is not produced.
+
+With Docker Compose:
+
+```bash
+docker compose exec api python -m app.scripts.smoke_test
+```
+
+Locally from `backend/`:
+
+```bash
+python -m app.scripts.smoke_test
+```
+
+Expected result:
+
+```text
+passed: True
+decision: invoice_incorrect
+cause: duplicate_usage_events
+score: 100
+tool_accuracy: 100
+required_tools_called: 5/5
+tool_calls_traced: 5
+duplicate_usage_detected: 50000
+overcharge_detected_dollars: 2000.0
+```
+
+## Tests
+
+Install dev dependencies:
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+Run the test suite:
+
+```bash
+DATABASE_URL=sqlite+pysqlite:////tmp/workflowgym_pytest.db pytest -q
+```
+
+The tests validate:
+
+- duplicate usage and overcharge detection
+- agent trace storage
+- evaluator scoring metrics
+- aggregate metrics summary
+
+## Quantifiable Metrics
+
+Each evaluated run stores:
+
+- `score`: 0-100 weighted score
+- `tool_accuracy`: percent of required tools called
+- `required_tool_count`
+- `called_required_tool_count`
+- `missing_required_tool_count`
+- `total_tool_call_count`
+- `run_duration_ms`
+- `detected_overcharge_cents`
+- `duplicate_usage_quantity`
+
+The aggregate endpoint summarizes portfolio-friendly metrics:
+
+```text
+GET /metrics/summary
+```
+
+Example metrics after one successful Acme run:
+
+```json
+{
+  "total_scenarios": 1,
+  "total_runs": 1,
+  "passed_runs": 1,
+  "pass_rate": 100.0,
+  "average_score": 100.0,
+  "average_tool_accuracy": 100.0,
+  "total_tool_calls": 5,
+  "total_detected_overcharge_cents": 200000,
+  "total_duplicate_usage_quantity": 50000
+}
+```
+
+## Deployment Notes
+
+The API is containerized with [backend/Dockerfile](backend/Dockerfile). A Render Blueprint is available in [render.yaml](render.yaml).
+
+For a hosted deployment, provide:
+
+```text
+DATABASE_URL
+PORT
+AUTO_SEED_DEMO
+```
+
+The app creates tables on startup using SQLAlchemy `create_all` for the learning MVP. A production version should replace that with Alembic migrations.
+
+Set `AUTO_SEED_DEMO=true` on a demo deployment to seed `duplicate_usage_001` when it is missing.
+
+## Next Milestones
+
+- Add automated tests with `pytest`.
+- Add Alembic migrations.
+- Add React + TypeScript dashboard.
+- Add an LLM-powered agent that calls the same deterministic tools.
+- Add more business workflow scenarios.
