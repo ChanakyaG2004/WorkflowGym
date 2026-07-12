@@ -69,36 +69,118 @@ The benchmark covers:
 
 The current 20 benchmark scenarios use a **real public pricing reference plus synthetic benchmark invoices**.
 
-Real public source:
+This is intentional. Public pricing pages are useful for modeling how billing systems work, but real customer invoices, contracts, and usage logs are usually private. WorkflowGym therefore uses public sources for domain grounding and synthetic fixtures for controlled benchmark evaluation.
 
-- AWS API Gateway pricing: https://aws.amazon.com/api-gateway/pricing/
+### Source 1: AWS API Gateway Pricing
 
-Real facts used as benchmark context:
+Link: https://aws.amazon.com/api-gateway/pricing/
 
-- API Gateway charges for API calls received and data transferred out.
-- AWS REST API pricing examples use `$3.50 per million API calls`.
-- AWS API Gateway pricing examples use `$0.09 per GB` for data transfer.
+This is the primary real-world reference used by the current benchmark.
 
-Synthetic parts:
+What this source establishes:
+
+- API products can be priced by received API calls.
+- Data transfer can also be part of the bill.
+- Pricing can be modeled as usage quantity multiplied by a unit rate.
+- AWS REST API pricing examples include `$3.50 per million API calls`.
+- AWS API Gateway pricing examples include `$0.09 per GB` for data transfer.
+
+How WorkflowGym uses it:
+
+- The benchmark models a usage-based API billing workflow.
+- Each scenario gives the agent invoice quantities, usage records, contract terms, and overage rates.
+- The agent must recompute the expected billable usage and compare it with the invoice.
+- The UI links every scenario back to this pricing source so it is clear that the benchmark is grounded in a real public billing pattern.
+
+What WorkflowGym does **not** claim:
+
+- It does not claim that Acme AI, Beta Robotics, or any seeded customer is a real AWS customer.
+- It does not claim that the seeded invoices are real AWS invoices.
+- It does not copy AWS invoices, AWS customer data, or confidential usage logs.
+- It does not exactly reproduce AWS's full pricing system, tiers, regions, private API behavior, caching charges, or data-transfer edge cases.
+- It uses simplified per-call overage rates so the benchmark remains easy to understand and deterministic.
+
+### Source 2: AWS Price List Bulk API Documentation
+
+Link: https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html
+
+This source is not used directly by the current seed data, but it documents a realistic future path for replacing manually curated pricing facts with programmatic public pricing ingestion.
+
+What this source establishes:
+
+- AWS exposes pricing data through official pricing APIs.
+- The Bulk API is intended for consuming large amounts of AWS product and pricing information.
+- The documented workflow includes discovering services, listing price lists, and downloading price list files.
+- This is the kind of source a production-grade benchmark could use to keep pricing fixtures synchronized with public cloud pricing.
+
+How WorkflowGym could use it later:
+
+- Add a pricing-ingestion job that fetches public cloud pricing data.
+- Store real public service codes, regions, SKUs, and unit prices in PostgreSQL.
+- Generate benchmark scenarios from real public pricing tables instead of hand-written pricing fixtures.
+- Test whether agents can reason over more complex public pricing catalogs.
+
+What WorkflowGym does **not** currently do with it:
+
+- It does not call the AWS Price List Bulk API during the live demo.
+- It does not auto-refresh prices.
+- It does not store downloaded AWS price files.
+- It does not use real AWS SKUs in the current 20 scenarios.
+
+### Source 3: SEC EDGAR APIs
+
+Link: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
+
+This source is listed as a future expansion path, not as a current input to the 20 invoice scenarios.
+
+What this source establishes:
+
+- The SEC provides public API access to EDGAR filing data.
+- Public company filings can be used as real-world financial source material.
+- A future WorkflowGym benchmark could use public filings for finance, accounting, procurement, or vendor-risk workflows.
+
+How WorkflowGym could use it later:
+
+- Build scenarios where an agent checks public-company facts from filings.
+- Add FinanceOps tasks involving revenue, expenses, vendor concentration, risk factors, or public-company metadata.
+- Create workflows that combine invoice tools with public financial filings.
+
+What WorkflowGym does **not** currently do with it:
+
+- It does not ingest SEC filings.
+- It does not use public-company financial statements in the current benchmark.
+- It does not claim that any current scenario is based on a real company filing.
+
+### Synthetic Benchmark Fixtures
+
+The following parts of the current benchmark are synthetic:
 
 - customer names
 - usage volumes
 - invoice line items
+- included allowances
+- overage rates
 - injected billing errors
 - hidden ground truth labels
+- final expected outcomes
 
-Why synthetic data:
+Why synthetic fixtures are used:
 
-- Real customer invoices and usage logs are usually private.
-- Hidden ground truth needs to be controlled so the evaluator can score runs deterministically.
-- Synthetic fixtures let the benchmark safely test known billing failure modes.
+- Real invoices and customer usage logs are usually private.
+- A benchmark needs known hidden ground truth so it can score runs deterministically.
+- Synthetic fixtures make it possible to test duplicate usage, rate mismatch, allowance errors, and clean control cases safely.
+- The same scenarios can be rerun repeatedly with stable expected answers.
+- The result is a resume-friendly project that demonstrates agent evaluation mechanics without exposing or fabricating claims about private real-world customer data.
 
-Additional public real-world sources that could be integrated in a future version:
+### Current Source Label In The App
 
-- SEC EDGAR APIs for public company filings and financial facts: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
-- AWS Price List Bulk API for public cloud pricing data: https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html
+In the live UI and `/api/demo` response, each scenario is labeled as:
 
-In the live UI, each scenario is labeled with its data source type.
+```text
+real_public_reference_plus_synthetic_invoice
+```
+
+That means the scenario is grounded in a real public pricing reference, but the customer, invoice, usage data, and hidden error are synthetic benchmark data.
 
 ## Architecture
 
