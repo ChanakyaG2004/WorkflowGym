@@ -4,9 +4,14 @@
 **API Docs:** https://workflowgym.vercel.app/docs  
 **Raw Demo JSON:** https://workflowgym.vercel.app/api/demo
 
-WorkflowGym is a deployable benchmark for testing tool-using AI agents in simulated FinanceOps workflows.
+## Description
 
-The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates 20 seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
+Hello! I built WorkflowGym, a deployable full-stack benchmark for testing tool-using AI agents on simulated FinanceOps billing investigations. The current MVP seeds 20 invoice-dispute scenarios grounded in real public API-pricing patterns, then uses synthetic customer, usage, invoice, and hidden-error fixtures so that each case has deterministic ground truth. A rule-based agent investigates each scenario by calling five finance tools: customer lookup, invoice lookup, usage-event retrieval, contract-term lookup, and invoice-vs-usage comparison.
+
+Every tool call is stored as an auditable trace. The agent produces a structured final decision explaining whether the invoice is correct and what caused the issue, and an evaluator scores the run by checking decision accuracy, cause accuracy, required-tool coverage, and total traced tool calls.
+
+The live FastAPI app exposes API endpoints and a polished dashboard showing benchmark metrics, scenario results, invoice calculations, provenance labels, and trace details.
+
 
 Current benchmark results:
 
