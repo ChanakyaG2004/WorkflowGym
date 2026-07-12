@@ -587,6 +587,7 @@ Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, 
               <span>${item.customer} · ${item.month}</span>
               <div class="scenario-meta">
                 <div><b>What is tested:</b> ${causeDescriptions[item.expected_cause] || "FinanceOps invoice investigation"}</div>
+                <div><b>Data source:</b> ${item.data_source_type} · ${item.data_source_label}</div>
                 <div><b>Customer complaint:</b> ${item.test_prompt}</div>
                 <div><b>Expected ground truth:</b> ${item.expected_outcome} · ${item.expected_cause}</div>
                 <div><b>Agent result:</b> ${item.decision} · ${item.cause} · ${item.required_tools_called} tools · ${item.tool_calls_traced} traced calls</div>

@@ -65,6 +65,23 @@ The benchmark covers:
 - invoice usage exceeding recorded usage
 - a correct-invoice control case
 
+## Data Provenance
+
+The current 20 benchmark scenarios are **synthetic WorkflowGym fixtures**. They do not use private real customer invoices or confidential company billing records.
+
+Why synthetic data:
+
+- Real customer invoices and usage logs are usually private.
+- Hidden ground truth needs to be controlled so the evaluator can score runs deterministically.
+- Synthetic fixtures let the benchmark safely test known billing failure modes.
+
+Public real-world sources that could be integrated in a future version:
+
+- SEC EDGAR APIs for public company filings and financial facts: https://www.sec.gov/search-filings/edgar-application-programming-interfaces
+- AWS Price List Bulk API for public cloud pricing data: https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html
+
+In the live UI, each scenario is labeled with its data source type.
+
 ## Architecture
 
 ```text
