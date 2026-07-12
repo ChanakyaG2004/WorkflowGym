@@ -4,6 +4,10 @@
 
 WorkflowGym: Tool-Using AI Agent Evaluation Platform
 
+GitHub: https://github.com/ChanakyaG2004/WorkflowGym
+
+Live demo: https://workflowgym.vercel.app/demo
+
 ## Short Description
 
 Built a FastAPI and PostgreSQL backend for evaluating tool-using AI agents in simulated FinanceOps workflows. The MVP seeds a duplicate billing scenario, runs a deterministic agent through finance tools, stores every tool call as a trace, and evaluates the final answer against hidden ground truth.

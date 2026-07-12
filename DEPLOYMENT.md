@@ -98,6 +98,14 @@ The [api/index.py](api/index.py), [requirements.txt](requirements.txt), and [ver
 
 This demo uses SQLite in `/tmp` and auto-seeded data, so it is best for public API exploration rather than persistent production storage.
 
+Because serverless `/tmp` storage is not a durable database, the Vercel demo includes:
+
+```text
+GET /demo
+```
+
+That endpoint seeds, runs, evaluates, and returns metrics in one request.
+
 Deploy:
 
 ```bash

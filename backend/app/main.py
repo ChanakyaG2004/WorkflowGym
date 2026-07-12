@@ -8,14 +8,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from app.agents.rule_based_agent import run_rule_based_agent
-from app.db.database import get_db
+from app.db.database import SessionLocal, get_db
 from app.db.init_db import init_db
 from app.db.models import AgentRun, EvaluationResult, Scenario
 from app.evaluation.evaluator import evaluate_run
 from app.schemas.metrics import MetricsSummary
 from app.schemas.run import AgentRunRead
 from app.schemas.scenario import ScenarioRead
-from app.seed.seed_acme import seed_acme_if_missing
+from app.seed.seed_acme import seed_acme, seed_acme_if_missing
 
 
 @asynccontextmanager
@@ -148,3 +148,45 @@ def get_metrics_summary(db: Session = Depends(get_db)) -> MetricsSummary:
         total_detected_overcharge_cents=int(aggregates[4] or 0),
         total_duplicate_usage_quantity=int(aggregates[5] or 0),
     )
+
+
+@app.get("/demo")
+def run_demo() -> dict[str, object]:
+    """Run the complete demo in one request for stateless public deployments."""
+    seed_acme(reset=True)
+    db = SessionLocal()
+    try:
+        run = run_scenario("duplicate_usage_001", db)
+        summary = get_metrics_summary(db)
+        return {
+            "github": "https://github.com/ChanakyaG2004/WorkflowGym",
+            "scenario": "duplicate_usage_001",
+            "run_id": run.id,
+            "decision": run.final_answer["decision"] if run.final_answer else None,
+            "cause": run.final_answer["cause"] if run.final_answer else None,
+            "score": run.evaluation_result.score if run.evaluation_result else None,
+            "tool_accuracy": (
+                run.evaluation_result.tool_accuracy if run.evaluation_result else None
+            ),
+            "required_tools_called": (
+                f"{run.evaluation_result.called_required_tool_count}/"
+                f"{run.evaluation_result.required_tool_count}"
+                if run.evaluation_result
+                else None
+            ),
+            "tool_calls_traced": len(run.steps),
+            "duplicate_usage_detected": (
+                run.evaluation_result.duplicate_usage_quantity
+                if run.evaluation_result
+                else None
+            ),
+            "overcharge_detected_dollars": (
+                run.evaluation_result.detected_overcharge_cents / 100
+                if run.evaluation_result
+                else None
+            ),
+            "passed": run.evaluation_result.passed if run.evaluation_result else None,
+            "metrics_summary": summary.model_dump(),
+        }
+    finally:
+        db.close()

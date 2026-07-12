@@ -69,6 +69,7 @@ POST /scenarios/{scenario_id}/run
 GET  /runs
 GET  /runs/{run_id}
 GET  /metrics/summary
+GET  /demo
 ```
 
 Interactive docs are available at:
@@ -222,6 +223,14 @@ The API is containerized with [backend/Dockerfile](backend/Dockerfile). A Render
 The root [Dockerfile](Dockerfile) is a lightweight public-demo container for Hugging Face Spaces. It runs the same API with SQLite and auto-seeded data.
 
 The [vercel.json](vercel.json) and [api/index.py](api/index.py) files support a lightweight Vercel demo with SQLite in `/tmp`.
+
+For serverless demos, use:
+
+```text
+https://workflowgym.vercel.app/demo
+```
+
+That endpoint seeds, runs, evaluates, and returns metrics in one request.
 
 For a hosted deployment, provide:
 
