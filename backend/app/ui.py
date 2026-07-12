@@ -571,7 +571,7 @@ Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, 
         preview.textContent = "Running scenario duplicate_usage_001...";
 
         try {
-          const response = await fetch("/demo", { cache: "no-store" });
+          const response = await fetch("/api/demo", { cache: "no-store" });
           if (!response.ok) {
             throw new Error(`Demo failed with status ${response.status}`);
           }

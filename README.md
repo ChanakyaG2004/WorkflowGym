@@ -2,7 +2,7 @@
 
 **Live Demo:** https://workflowgym.vercel.app  
 **API Docs:** https://workflowgym.vercel.app/docs  
-**Raw Demo JSON:** https://workflowgym.vercel.app/demo
+**Raw Demo JSON:** https://workflowgym.vercel.app/api/demo
 
 WorkflowGym is a deployable benchmark for testing tool-using AI agents in simulated FinanceOps workflows.
 
@@ -96,7 +96,7 @@ POST /scenarios/{scenario_id}/run
 GET  /runs
 GET  /runs/{run_id}
 GET  /metrics/summary
-GET  /demo
+GET  /api/demo
 ```
 
 Local interactive API docs are available at:
@@ -251,7 +251,7 @@ The live Vercel demo uses [vercel.json](vercel.json) and [api/index.py](api/inde
 For raw serverless demo JSON, use:
 
 ```text
-https://workflowgym.vercel.app/demo
+https://workflowgym.vercel.app/api/demo
 ```
 
 That endpoint seeds, runs, evaluates, and returns metrics in one request.

@@ -158,7 +158,13 @@ def get_metrics_summary(db: Session = Depends(get_db)) -> MetricsSummary:
     )
 
 
-@app.get("/demo")
+@app.get("/demo", include_in_schema=False)
+def demo_page() -> HTMLResponse:
+    """Serve the human-friendly demo page at /demo as well as /."""
+    return render_home_page()
+
+
+@app.get("/api/demo")
 def run_demo() -> dict[str, object]:
     """Run all demo scenarios in one request for stateless public deployments."""
     seed_acme(reset=True)
