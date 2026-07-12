@@ -9,3 +9,4 @@ __pycache__/
 backend/.venv/
 backend/app/**/__pycache__/
 .vercel
+PHASE_*.md
