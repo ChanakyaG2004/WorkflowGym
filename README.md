@@ -390,11 +390,3 @@ The app creates tables on startup using SQLAlchemy `create_all` for the learning
 
 Set `AUTO_SEED_DEMO=true` on a demo deployment to seed the benchmark scenarios when they are missing.
 
-## Resume Bullets
-
-```text
-WorkflowGym | Tool-Using AI Agent Evaluation Platform | Python, FastAPI, SQLAlchemy, Docker, Vercel | GitHub | Live Demo
-Built a FastAPI backend for evaluating tool-using AI agents across 20 simulated FinanceOps billing scenarios with hidden ground truth, deterministic tools, trace storage, and automated scoring.
-Implemented 5 finance tools covering customer lookup, invoice inspection, usage analysis, contract terms, and invoice-vs-usage comparison, storing 100 total tool calls as auditable traces.
-Achieved 20/20 passing benchmark runs with 100% pass rate, 100/100 average evaluator score, 100% tool accuracy, 145,000 duplicate API calls detected, and $29,600 total overcharge identified.
-```
