@@ -2,7 +2,7 @@
 
 WorkflowGym is a full-stack project foundation for testing tool-using AI agents in simulated business workflows.
 
-The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates six seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
+The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates 20 seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
 
 ## Resume Summary
 
@@ -21,11 +21,25 @@ WorkflowGym demonstrates:
 
 ```text
 duplicate_usage_001
+duplicate_usage_002
+duplicate_usage_003
+duplicate_usage_004
 overage_rate_mismatch_001
+overage_rate_mismatch_002
+overage_rate_mismatch_003
+overage_rate_mismatch_004
 included_allowance_not_applied_001
+included_allowance_not_applied_002
+included_allowance_not_applied_003
 below_allowance_overage_001
+below_allowance_overage_002
+below_allowance_overage_003
 invoice_usage_exceeds_records_001
+invoice_usage_exceeds_records_002
+invoice_usage_exceeds_records_003
 invoice_correct_001
+invoice_correct_002
+invoice_correct_003
 ```
 
 The benchmark covers:
@@ -152,13 +166,13 @@ Expected result:
 
 ```text
 passed: True
-scenarios: 6
-passed_runs: 6
+scenarios: 20
+passed_runs: 20
 average_score: 100.0
 average_tool_accuracy: 100.0
-total_tool_calls_traced: 30
-duplicate_usage_detected: 50000
-overcharge_detected_dollars: 9600.0
+total_tool_calls_traced: 100
+duplicate_usage_detected: 145000
+overcharge_detected_dollars: 29600.0
 ```
 
 ## Tests
@@ -208,15 +222,15 @@ Example metrics after one full benchmark run:
 
 ```json
 {
-  "total_scenarios": 6,
-  "total_runs": 6,
-  "passed_runs": 6,
+  "total_scenarios": 20,
+  "total_runs": 20,
+  "passed_runs": 20,
   "pass_rate": 100.0,
   "average_score": 100.0,
   "average_tool_accuracy": 100.0,
-  "total_tool_calls": 30,
-  "total_detected_overcharge_cents": 960000,
-  "total_duplicate_usage_quantity": 50000
+  "total_tool_calls": 100,
+  "total_detected_overcharge_cents": 2960000,
+  "total_duplicate_usage_quantity": 145000
 }
 ```
 

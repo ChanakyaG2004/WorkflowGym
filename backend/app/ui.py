@@ -370,7 +370,7 @@ def render_home_page() -> HTMLResponse:
           <p class="eyebrow">Tool-Using Agent Evaluation</p>
           <h1>FinanceOps simulator for testing AI agent investigations.</h1>
           <p class="lede">
-            WorkflowGym runs six billing investigation scenarios, records every
+            WorkflowGym runs 20 billing investigation scenarios, records every
             tool call, and scores whether the agent found each hidden invoice
             issue.
           </p>
@@ -389,7 +389,7 @@ def render_home_page() -> HTMLResponse:
           </div>
           <pre id="preview">Ready.
 
-Click "Run Live Demo" to seed six scenarios, run the agent, evaluate each trace, and display metrics.</pre>
+Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, and display metrics.</pre>
         </div>
       </div>
 
@@ -425,7 +425,7 @@ Click "Run Live Demo" to seed six scenarios, run the agent, evaluate each trace,
           <div class="step">
             <div>
               <strong>No benchmark run yet</strong><br />
-              <span>Run the demo to evaluate all six seeded scenarios.</span>
+              <span>Run the demo to evaluate all 20 seeded scenarios.</span>
             </div>
             <span class="badge">Waiting</span>
           </div>
@@ -436,8 +436,8 @@ Click "Run Live Demo" to seed six scenarios, run the agent, evaluate each trace,
         <div class="panel">
           <h3>Scenario</h3>
           <ul class="facts">
-            <li>Six seeded FinanceOps investigations</li>
-            <li>Five incorrect invoices and one clean control case</li>
+            <li>20 seeded FinanceOps investigations</li>
+            <li>17 incorrect invoices and 3 clean control cases</li>
             <li>All scenarios use the same deterministic finance tools</li>
             <li>Every run stores a five-step tool trace</li>
             <li>Metrics aggregate score, pass rate, tool calls, and overcharge</li>

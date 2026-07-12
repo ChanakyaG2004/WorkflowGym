@@ -72,24 +72,24 @@ def test_metrics_summary_reports_portfolio_numbers():
     finally:
         db.close()
 
-    assert summary.total_scenarios == 6
-    assert summary.total_runs == 6
-    assert summary.passed_runs == 6
+    assert summary.total_scenarios == 20
+    assert summary.total_runs == 20
+    assert summary.passed_runs == 20
     assert summary.pass_rate == 100.0
     assert summary.average_score == 100.0
     assert summary.average_tool_accuracy == 100.0
-    assert summary.total_tool_calls == 30
-    assert summary.total_detected_overcharge_cents == 960_000
-    assert summary.total_duplicate_usage_quantity == 50_000
+    assert summary.total_tool_calls == 100
+    assert summary.total_detected_overcharge_cents == 2_960_000
+    assert summary.total_duplicate_usage_quantity == 145_000
 
 
 def test_demo_runs_all_scenarios():
     result = run_demo()
 
-    assert result["metrics_summary"]["total_scenarios"] == 6
-    assert result["metrics_summary"]["total_runs"] == 6
+    assert result["metrics_summary"]["total_scenarios"] == 20
+    assert result["metrics_summary"]["total_runs"] == 20
     assert result["metrics_summary"]["pass_rate"] == 100.0
-    assert len(result["scenario_results"]) == 6
+    assert len(result["scenario_results"]) == 20
     assert {item["cause"] for item in result["scenario_results"]} == {
         "duplicate_usage_events",
         "overage_rate_mismatch",
