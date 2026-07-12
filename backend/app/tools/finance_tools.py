@@ -102,23 +102,63 @@ def compare_usage_to_invoice(db: Session, customer_id: int, month: str) -> dict[
     overage_rate_cents = plan["overage_rate_cents"]
 
     valid_quantity = usage["valid_quantity"]
-    invoiced_quantity = sum(item["quantity"] for item in invoice["line_items"])
+    total_recorded_quantity = usage["total_quantity"]
+    api_line_items = [
+        item
+        for item in invoice["line_items"]
+        if "api" in item["description"].lower()
+    ]
+    invoiced_quantity = sum(item["quantity"] for item in api_line_items)
+    actual_overage_cents = sum(
+        item["amount_cents"] for item in api_line_items if item["amount_cents"] > 0
+    )
+    invoice_unit_price_cents = (
+        api_line_items[0]["unit_price_cents"] if api_line_items else overage_rate_cents
+    )
 
     correct_overage_calls = max(valid_quantity - included_calls, 0)
-    actual_charged_overage_calls = max(invoiced_quantity - included_calls, 0)
+    actual_charged_overage_calls = (
+        actual_overage_cents // invoice_unit_price_cents
+        if invoice_unit_price_cents > 0
+        else 0
+    )
     expected_overage_cents = correct_overage_calls * overage_rate_cents
-    actual_overage_cents = actual_charged_overage_calls * overage_rate_cents
 
-    invoice_incorrect = actual_charged_overage_calls != correct_overage_calls
+    invoice_incorrect = actual_overage_cents != expected_overage_cents
+
+    if not invoice_incorrect:
+        cause = "no_issue_found"
+    elif usage["duplicate_quantity"] > 0 and invoiced_quantity > valid_quantity:
+        cause = "duplicate_usage_events"
+    elif valid_quantity < included_calls and actual_overage_cents > 0:
+        cause = "below_allowance_overage_charged"
+    elif invoiced_quantity > total_recorded_quantity:
+        cause = "invoice_usage_exceeds_recorded_usage"
+    elif (
+        invoice_unit_price_cents != overage_rate_cents
+        and actual_charged_overage_calls == correct_overage_calls
+    ):
+        cause = "overage_rate_mismatch"
+    elif (
+        valid_quantity > included_calls
+        and invoiced_quantity == valid_quantity
+        and actual_charged_overage_calls == valid_quantity
+    ):
+        cause = "included_allowance_not_applied"
+    else:
+        cause = "incorrect_overage_calculation"
 
     return {
         "comparison_possible": True,
         "invoice_incorrect": invoice_incorrect,
-        "cause": "duplicate_usage_events" if usage["duplicate_quantity"] > 0 else "unknown",
+        "cause": cause,
         "valid_usage_quantity": valid_quantity,
+        "total_recorded_usage_quantity": total_recorded_quantity,
         "duplicate_usage_quantity": usage["duplicate_quantity"],
         "invoice_usage_quantity": invoiced_quantity,
         "included_api_calls": included_calls,
+        "contract_overage_rate_cents": overage_rate_cents,
+        "invoice_unit_price_cents": invoice_unit_price_cents,
         "correct_billable_overage_calls": correct_overage_calls,
         "actual_charged_overage_calls": actual_charged_overage_calls,
         "expected_overage_cents": expected_overage_cents,

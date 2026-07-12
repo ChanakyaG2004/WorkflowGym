@@ -39,7 +39,7 @@ def _record_tool_call(
 
 
 def run_rule_based_agent(db: Session, scenario: Scenario) -> AgentRun:
-    """Run a deterministic investigation for the duplicate usage scenario."""
+    """Run a deterministic FinanceOps investigation for one scenario."""
     run = AgentRun(scenario_id=scenario.id, status="running")
     db.add(run)
     db.commit()
@@ -93,14 +93,20 @@ def run_rule_based_agent(db: Session, scenario: Scenario) -> AgentRun:
         "decision": decision,
         "cause": comparison["cause"],
         "explanation": (
-            "The invoice charged overage on duplicate usage events. "
+            f"The agent diagnosed the invoice as {decision}. "
             f"Valid usage was {comparison['valid_usage_quantity']} API calls, "
-            f"so billable overage should be {comparison['correct_billable_overage_calls']} calls. "
-            f"The invoice charged {comparison['actual_charged_overage_calls']} overage calls."
+            f"the contract included {comparison['included_api_calls']} calls, "
+            f"and billable overage should be "
+            f"{comparison['correct_billable_overage_calls']} calls. "
+            f"The invoice charged {comparison['actual_charged_overage_calls']} "
+            f"overage calls with cause {comparison['cause']}."
         ),
         "evidence": [
             f"Valid usage quantity: {comparison['valid_usage_quantity']}",
+            f"Invoice usage quantity: {comparison['invoice_usage_quantity']}",
             f"Duplicate usage quantity: {comparison['duplicate_usage_quantity']}",
+            f"Contract overage rate cents: {comparison['contract_overage_rate_cents']}",
+            f"Invoice unit price cents: {comparison['invoice_unit_price_cents']}",
             f"Correct billable overage calls: {comparison['correct_billable_overage_calls']}",
             f"Actual charged overage calls: {comparison['actual_charged_overage_calls']}",
             f"Overcharge cents: {comparison['overcharge_cents']}",

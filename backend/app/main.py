@@ -160,40 +160,57 @@ def get_metrics_summary(db: Session = Depends(get_db)) -> MetricsSummary:
 
 @app.get("/demo")
 def run_demo() -> dict[str, object]:
-    """Run the complete demo in one request for stateless public deployments."""
+    """Run all demo scenarios in one request for stateless public deployments."""
     seed_acme(reset=True)
     db = SessionLocal()
     try:
-        run = run_scenario("duplicate_usage_001", db)
+        scenarios = db.scalars(select(Scenario).order_by(Scenario.id)).all()
+        scenario_results = []
+        for scenario in scenarios:
+            run = run_scenario(scenario.scenario_key, db)
+            evaluation = run.evaluation_result
+            scenario_results.append(
+                {
+                    "scenario": scenario.scenario_key,
+                    "customer": scenario.customer_name,
+                    "decision": run.final_answer["decision"] if run.final_answer else None,
+                    "cause": run.final_answer["cause"] if run.final_answer else None,
+                    "score": evaluation.score if evaluation else None,
+                    "tool_accuracy": evaluation.tool_accuracy if evaluation else None,
+                    "required_tools_called": (
+                        f"{evaluation.called_required_tool_count}/"
+                        f"{evaluation.required_tool_count}"
+                        if evaluation
+                        else None
+                    ),
+                    "tool_calls_traced": len(run.steps),
+                    "duplicate_usage_detected": (
+                        evaluation.duplicate_usage_quantity if evaluation else None
+                    ),
+                    "overcharge_detected_dollars": (
+                        evaluation.detected_overcharge_cents / 100
+                        if evaluation
+                        else None
+                    ),
+                    "passed": evaluation.passed if evaluation else None,
+                }
+            )
+
         summary = get_metrics_summary(db)
+        first_result = scenario_results[0]
         return {
             "github": "https://github.com/ChanakyaG2004/WorkflowGym",
-            "scenario": "duplicate_usage_001",
-            "run_id": run.id,
-            "decision": run.final_answer["decision"] if run.final_answer else None,
-            "cause": run.final_answer["cause"] if run.final_answer else None,
-            "score": run.evaluation_result.score if run.evaluation_result else None,
-            "tool_accuracy": (
-                run.evaluation_result.tool_accuracy if run.evaluation_result else None
-            ),
-            "required_tools_called": (
-                f"{run.evaluation_result.called_required_tool_count}/"
-                f"{run.evaluation_result.required_tool_count}"
-                if run.evaluation_result
-                else None
-            ),
-            "tool_calls_traced": len(run.steps),
-            "duplicate_usage_detected": (
-                run.evaluation_result.duplicate_usage_quantity
-                if run.evaluation_result
-                else None
-            ),
-            "overcharge_detected_dollars": (
-                run.evaluation_result.detected_overcharge_cents / 100
-                if run.evaluation_result
-                else None
-            ),
-            "passed": run.evaluation_result.passed if run.evaluation_result else None,
+            "scenario": first_result["scenario"],
+            "decision": first_result["decision"],
+            "cause": first_result["cause"],
+            "score": first_result["score"],
+            "tool_accuracy": first_result["tool_accuracy"],
+            "required_tools_called": first_result["required_tools_called"],
+            "tool_calls_traced": first_result["tool_calls_traced"],
+            "duplicate_usage_detected": first_result["duplicate_usage_detected"],
+            "overcharge_detected_dollars": first_result["overcharge_detected_dollars"],
+            "passed": first_result["passed"],
+            "scenario_results": scenario_results,
             "metrics_summary": summary.model_dump(),
         }
     finally:

@@ -2,7 +2,7 @@
 
 WorkflowGym is a full-stack project foundation for testing tool-using AI agents in simulated business workflows.
 
-The current MVP is a backend-only FinanceOps simulator. A rule-based agent investigates why Acme AI's June 2026 invoice is too high, calls deterministic finance tools, stores a tool-call trace, and gets evaluated against hidden ground truth.
+The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates six seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
 
 ## Resume Summary
 
@@ -17,26 +17,25 @@ WorkflowGym demonstrates:
 - Dockerized local deployment
 - API-first design ready for a future React dashboard
 
-## Current Scenario
+## Current Scenarios
 
 ```text
-Scenario: duplicate_usage_001
-Customer: Acme AI
-Month: 2026-06
-Complaint: June invoice is too high
-Hidden cause: duplicate usage events
-Expected outcome: invoice_incorrect
+duplicate_usage_001
+overage_rate_mismatch_001
+included_allowance_not_applied_001
+below_allowance_overage_001
+invoice_usage_exceeds_records_001
+invoice_correct_001
 ```
 
-Billing facts:
+The benchmark covers:
 
-- Contract includes 100,000 API calls.
-- Overage costs 4 cents per API call.
-- Valid June usage was 150,000 API calls.
-- Duplicate June usage added another 50,000 API calls.
-- Invoice incorrectly charged for 200,000 total calls.
-- Correct billable overage is 50,000 calls.
-- Actual charged overage is 100,000 calls.
+- duplicate usage events
+- overage rate mismatch
+- included allowance not applied
+- below-allowance overage charge
+- invoice usage exceeding recorded usage
+- a correct-invoice control case
 
 ## Architecture
 
@@ -135,7 +134,7 @@ uvicorn app.main:app --reload
 
 ## Smoke Test
 
-The smoke test seeds Acme AI, runs the scenario, evaluates it, and fails if the expected result is not produced.
+The smoke test seeds all demo scenarios, runs the benchmark, evaluates every run, and fails if any expected result is not produced.
 
 With Docker Compose:
 
@@ -153,14 +152,13 @@ Expected result:
 
 ```text
 passed: True
-decision: invoice_incorrect
-cause: duplicate_usage_events
-score: 100
-tool_accuracy: 100
-required_tools_called: 5/5
-tool_calls_traced: 5
+scenarios: 6
+passed_runs: 6
+average_score: 100.0
+average_tool_accuracy: 100.0
+total_tool_calls_traced: 30
 duplicate_usage_detected: 50000
-overcharge_detected_dollars: 2000.0
+overcharge_detected_dollars: 9600.0
 ```
 
 ## Tests
@@ -206,18 +204,18 @@ The aggregate endpoint summarizes portfolio-friendly metrics:
 GET /metrics/summary
 ```
 
-Example metrics after one successful Acme run:
+Example metrics after one full benchmark run:
 
 ```json
 {
-  "total_scenarios": 1,
-  "total_runs": 1,
-  "passed_runs": 1,
+  "total_scenarios": 6,
+  "total_runs": 6,
+  "passed_runs": 6,
   "pass_rate": 100.0,
   "average_score": 100.0,
   "average_tool_accuracy": 100.0,
-  "total_tool_calls": 5,
-  "total_detected_overcharge_cents": 200000,
+  "total_tool_calls": 30,
+  "total_detected_overcharge_cents": 960000,
   "total_duplicate_usage_quantity": 50000
 }
 ```
@@ -248,11 +246,10 @@ AUTO_SEED_DEMO
 
 The app creates tables on startup using SQLAlchemy `create_all` for the learning MVP. A production version should replace that with Alembic migrations.
 
-Set `AUTO_SEED_DEMO=true` on a demo deployment to seed `duplicate_usage_001` when it is missing.
+Set `AUTO_SEED_DEMO=true` on a demo deployment to seed the benchmark scenarios when they are missing.
 
 ## Next Milestones
 
-- Add automated tests with `pytest`.
 - Add Alembic migrations.
 - Add React + TypeScript dashboard.
 - Add an LLM-powered agent that calls the same deterministic tools.

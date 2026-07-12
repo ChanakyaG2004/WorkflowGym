@@ -8,40 +8,42 @@ from app.seed.seed_acme import seed_acme
 
 
 def main() -> None:
-    """Seed Acme AI, run the scenario, and verify the expected pass result."""
+    """Seed demo data, run all scenarios, and verify the expected pass results."""
     seed_acme()
 
     db = SessionLocal()
     try:
-        scenario = db.scalar(
-            select(Scenario).where(Scenario.scenario_key == "duplicate_usage_001")
-        )
-        if scenario is None:
-            raise RuntimeError("Scenario duplicate_usage_001 was not seeded.")
+        scenarios = db.scalars(select(Scenario).order_by(Scenario.id)).all()
+        if not scenarios:
+            raise RuntimeError("No scenarios were seeded.")
 
-        run = run_rule_based_agent(db, scenario)
-        result = evaluate_run(db, run, scenario)
-
-        if not result.passed:
-            raise RuntimeError(f"Smoke test failed: {result.details}")
+        results = []
+        for scenario in scenarios:
+            run = run_rule_based_agent(db, scenario)
+            result = evaluate_run(db, run, scenario)
+            if not result.passed:
+                raise RuntimeError(f"Smoke test failed: {result.details}")
+            results.append(result)
 
         print(
             {
-                "scenario": scenario.scenario_key,
-                "run_id": run.id,
-                "decision": run.final_answer["decision"] if run.final_answer else None,
-                "cause": run.final_answer["cause"] if run.final_answer else None,
-                "score": result.score,
-                "tool_accuracy": result.tool_accuracy,
-                "required_tools_called": (
-                    f"{result.called_required_tool_count}/"
-                    f"{result.required_tool_count}"
+                "scenarios": len(scenarios),
+                "passed_runs": sum(1 for result in results if result.passed),
+                "average_score": sum(result.score for result in results) / len(results),
+                "average_tool_accuracy": (
+                    sum(result.tool_accuracy for result in results) / len(results)
                 ),
-                "tool_calls_traced": result.total_tool_call_count,
-                "duplicate_usage_detected": result.duplicate_usage_quantity,
-                "overcharge_detected_dollars": result.detected_overcharge_cents / 100,
-                "run_duration_ms": result.run_duration_ms,
-                "passed": result.passed,
+                "total_tool_calls_traced": sum(
+                    result.total_tool_call_count for result in results
+                ),
+                "duplicate_usage_detected": sum(
+                    result.duplicate_usage_quantity for result in results
+                ),
+                "overcharge_detected_dollars": sum(
+                    result.detected_overcharge_cents for result in results
+                )
+                / 100,
+                "passed": all(result.passed for result in results),
             }
         )
     finally:

@@ -370,9 +370,9 @@ def render_home_page() -> HTMLResponse:
           <p class="eyebrow">Tool-Using Agent Evaluation</p>
           <h1>FinanceOps simulator for testing AI agent investigations.</h1>
           <p class="lede">
-            WorkflowGym runs a billing dispute scenario, records every tool
-            call, and scores whether the agent found the hidden duplicate-usage
-            issue behind Acme AI's June 2026 invoice.
+            WorkflowGym runs six billing investigation scenarios, records every
+            tool call, and scores whether the agent found each hidden invoice
+            issue.
           </p>
           <div class="actions">
             <button class="primary" id="runButton" type="button">Run Live Demo</button>
@@ -389,7 +389,7 @@ def render_home_page() -> HTMLResponse:
           </div>
           <pre id="preview">Ready.
 
-Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, and display metrics.</pre>
+Click "Run Live Demo" to seed six scenarios, run the agent, evaluate each trace, and display metrics.</pre>
         </div>
       </div>
 
@@ -397,12 +397,12 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
         <h2>Evaluation Metrics</h2>
         <div class="grid">
           <div class="metric">
-            <div class="label">Evaluator Score</div>
+            <div class="label">Average Score</div>
             <div class="value" id="score">--</div>
             <div class="detail">Weighted decision, cause, and tool score</div>
           </div>
           <div class="metric">
-            <div class="label">Required Tools</div>
+            <div class="label">Tool Calls</div>
             <div class="value" id="tools">--</div>
             <div class="detail">Expected investigation coverage</div>
           </div>
@@ -412,9 +412,22 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
             <div class="detail">Hidden issue detected</div>
           </div>
           <div class="metric">
-            <div class="label">Overcharge</div>
+            <div class="label">Total Overcharge</div>
             <div class="value" id="overcharge">--</div>
             <div class="detail">Invoice amount identified</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Scenario Results</h2>
+        <div class="trace" id="results">
+          <div class="step">
+            <div>
+              <strong>No benchmark run yet</strong><br />
+              <span>Run the demo to evaluate all six seeded scenarios.</span>
+            </div>
+            <span class="badge">Waiting</span>
           </div>
         </div>
       </section>
@@ -423,11 +436,11 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
         <div class="panel">
           <h3>Scenario</h3>
           <ul class="facts">
-            <li>Customer: Acme AI</li>
-            <li>Complaint: June 2026 invoice is too high</li>
-            <li>Pricing: 100,000 included API calls, then $0.04 per extra call</li>
-            <li>Valid usage: 150,000 API calls</li>
-            <li>Hidden issue: 50,000 duplicate API calls</li>
+            <li>Six seeded FinanceOps investigations</li>
+            <li>Five incorrect invoices and one clean control case</li>
+            <li>All scenarios use the same deterministic finance tools</li>
+            <li>Every run stores a five-step tool trace</li>
+            <li>Metrics aggregate score, pass rate, tool calls, and overcharge</li>
           </ul>
         </div>
         <div class="panel">
@@ -436,7 +449,7 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
             <li>Decision: <strong id="decision">not run yet</strong></li>
             <li>Cause: <strong id="cause">not run yet</strong></li>
             <li>Pass status: <strong id="passed">not run yet</strong></li>
-            <li>Run duration: <strong id="duration">not run yet</strong></li>
+            <li>Pass rate: <strong id="passRate">not run yet</strong></li>
           </ul>
         </div>
       </section>
@@ -470,8 +483,9 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
       const decision = document.getElementById("decision");
       const cause = document.getElementById("cause");
       const passed = document.getElementById("passed");
-      const duration = document.getElementById("duration");
+      const passRate = document.getElementById("passRate");
       const trace = document.getElementById("trace");
+      const results = document.getElementById("results");
 
       const formatter = new Intl.NumberFormat("en-US");
       const dollars = new Intl.NumberFormat("en-US", {
@@ -500,6 +514,18 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
         `).join("");
       }
 
+      function renderScenarioResults(items) {
+        results.innerHTML = items.map((item) => `
+          <div class="step">
+            <div>
+              <strong>${item.scenario}</strong><br />
+              <span>${item.customer} · ${item.decision} · ${item.cause}</span>
+            </div>
+            <span class="badge">${item.score}/100</span>
+          </div>
+        `).join("");
+      }
+
       async function runDemo() {
         runButton.disabled = true;
         runButton.textContent = "Running...";
@@ -512,28 +538,29 @@ Click "Run Live Demo" to seed the scenario, run the agent, evaluate the trace, a
           }
           const data = await response.json();
           const summary = data.metrics_summary || {};
+          const scenarioResults = data.scenario_results || [];
+          const firstScenario = scenarioResults[0] || data;
 
-          score.textContent = `${data.score}/100`;
-          tools.textContent = data.required_tools_called;
-          duplicates.textContent = formatter.format(data.duplicate_usage_detected);
-          overcharge.textContent = dollars.format(data.overcharge_detected_dollars);
-          decision.textContent = data.decision;
-          cause.textContent = data.cause;
-          passed.textContent = data.passed ? "passed" : "failed";
-          duration.textContent = `${summary.average_run_duration_ms || "--"} ms`;
+          score.textContent = `${summary.average_score || data.score}/100`;
+          tools.textContent = formatter.format(summary.total_tool_calls || data.tool_calls_traced);
+          duplicates.textContent = formatter.format(summary.total_duplicate_usage_quantity || data.duplicate_usage_detected);
+          overcharge.textContent = dollars.format((summary.total_detected_overcharge_cents || 0) / 100 || data.overcharge_detected_dollars);
+          decision.textContent = firstScenario.decision;
+          cause.textContent = firstScenario.cause;
+          passed.textContent = scenarioResults.every((item) => item.passed) ? "all passed" : "review needed";
+          passRate.textContent = `${summary.pass_rate || "--"}%`;
 
           renderTrace();
+          renderScenarioResults(scenarioResults);
           preview.textContent = JSON.stringify({
-            scenario: data.scenario,
-            decision: data.decision,
-            cause: data.cause,
-            score: data.score,
-            tool_accuracy: data.tool_accuracy,
-            required_tools_called: data.required_tools_called,
-            tool_calls_traced: data.tool_calls_traced,
-            duplicate_usage_detected: data.duplicate_usage_detected,
-            overcharge_detected_dollars: data.overcharge_detected_dollars,
-            passed: data.passed
+            scenarios: summary.total_scenarios,
+            runs: summary.total_runs,
+            pass_rate: summary.pass_rate,
+            average_score: summary.average_score,
+            average_tool_accuracy: summary.average_tool_accuracy,
+            total_tool_calls: summary.total_tool_calls,
+            total_duplicate_usage_quantity: summary.total_duplicate_usage_quantity,
+            total_overcharge_dollars: (summary.total_detected_overcharge_cents || 0) / 100
           }, null, 2);
         } catch (error) {
           preview.textContent = error.message;
