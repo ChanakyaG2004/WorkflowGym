@@ -292,6 +292,10 @@ def render_home_page() -> HTMLResponse:
         gap: 16px;
       }
 
+      .scenario-step {
+        align-items: flex-start;
+      }
+
       .step strong {
         font-size: 14px;
       }
@@ -313,6 +317,19 @@ def render_home_page() -> HTMLResponse:
         color: var(--good);
         font-weight: 780;
         font-size: 12px;
+      }
+
+      .scenario-meta {
+        margin-top: 8px;
+        display: grid;
+        gap: 5px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .scenario-meta b {
+        color: var(--ink);
+        font-weight: 720;
       }
 
       .footer {
@@ -495,12 +512,27 @@ Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, 
       });
 
       const toolDescriptions = [
-        ["get_customer", "Loaded Acme AI customer record"],
-        ["get_invoice", "Loaded June 2026 invoice and line items"],
+        ["get_customer", "Loaded the customer record for the scenario"],
+        ["get_invoice", "Loaded the invoice and line items for the disputed month"],
         ["get_usage_events", "Separated valid usage from duplicate usage"],
         ["get_contract_terms", "Loaded included calls and overage rate"],
         ["compare_usage_to_invoice", "Compared valid usage against invoice charge"]
       ];
+
+      const causeDescriptions = {
+        duplicate_usage_events:
+          "Tests whether the agent catches usage events that were counted twice before billing.",
+        overage_rate_mismatch:
+          "Tests whether the agent compares the invoice unit price against the contracted overage rate.",
+        included_allowance_not_applied:
+          "Tests whether the agent verifies that included API calls were subtracted before overage billing.",
+        below_allowance_overage_charged:
+          "Tests whether the agent catches an overage charge even though usage stayed below the included allowance.",
+        invoice_usage_exceeds_recorded_usage:
+          "Tests whether the agent compares invoiced usage against the usage records and finds unexplained extra calls.",
+        no_issue_found:
+          "Control case: tests whether the agent can avoid false positives when the invoice matches usage and contract terms."
+      };
 
       function renderTrace() {
         trace.innerHTML = toolDescriptions.map(([name, text], index) => `
@@ -516,10 +548,17 @@ Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, 
 
       function renderScenarioResults(items) {
         results.innerHTML = items.map((item) => `
-          <div class="step">
+          <div class="step scenario-step">
             <div>
               <strong>${item.scenario}</strong><br />
-              <span>${item.customer} · ${item.decision} · ${item.cause}</span>
+              <span>${item.customer} · ${item.month}</span>
+              <div class="scenario-meta">
+                <div><b>What is tested:</b> ${causeDescriptions[item.expected_cause] || "FinanceOps invoice investigation"}</div>
+                <div><b>Customer complaint:</b> ${item.test_prompt}</div>
+                <div><b>Expected ground truth:</b> ${item.expected_outcome} · ${item.expected_cause}</div>
+                <div><b>Agent result:</b> ${item.decision} · ${item.cause} · ${item.required_tools_called} tools · ${item.tool_calls_traced} traced calls</div>
+                <div><b>Detected impact:</b> ${formatter.format(item.duplicate_usage_detected)} duplicate calls · ${dollars.format(item.overcharge_detected_dollars)} overcharge</div>
+              </div>
             </div>
             <span class="badge">${item.score}/100</span>
           </div>

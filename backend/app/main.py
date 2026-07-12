@@ -173,6 +173,10 @@ def run_demo() -> dict[str, object]:
                 {
                     "scenario": scenario.scenario_key,
                     "customer": scenario.customer_name,
+                    "month": scenario.month,
+                    "test_prompt": scenario.prompt,
+                    "expected_outcome": scenario.expected_outcome,
+                    "expected_cause": scenario.hidden_cause,
                     "decision": run.final_answer["decision"] if run.final_answer else None,
                     "cause": run.final_answer["cause"] if run.final_answer else None,
                     "score": evaluation.score if evaluation else None,
