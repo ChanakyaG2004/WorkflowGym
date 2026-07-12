@@ -1,8 +1,22 @@
 # WorkflowGym
 
+**Live Demo:** https://workflowgym.vercel.app  
+**API Docs:** https://workflowgym.vercel.app/docs  
+**Raw Demo JSON:** https://workflowgym.vercel.app/demo
+
 WorkflowGym is a deployable benchmark for testing tool-using AI agents in simulated FinanceOps workflows.
 
 The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates 20 seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
+
+Current benchmark results:
+
+- 20/20 passing runs
+- 100% pass rate
+- 100/100 average evaluator score
+- 100% average tool accuracy
+- 100 traced tool calls
+- 145,000 duplicate API calls detected
+- $29,600 total overcharge identified
 
 ## Highlights
 
@@ -17,7 +31,7 @@ WorkflowGym demonstrates:
 - Dockerized local deployment
 - Human-friendly live demo UI
 
-## Current Scenarios
+## Benchmark Scenarios
 
 ```text
 duplicate_usage_001
@@ -85,13 +99,7 @@ GET  /metrics/summary
 GET  /demo
 ```
 
-Live demo:
-
-```text
-https://workflowgym.vercel.app
-```
-
-Interactive API docs are available at:
+Local interactive API docs are available at:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -236,9 +244,9 @@ Example metrics after one full benchmark run:
 
 ## Deployment
 
-The API is containerized with [backend/Dockerfile](backend/Dockerfile). A Render Blueprint is available in [render.yaml](render.yaml).
+The API is containerized with [backend/Dockerfile](backend/Dockerfile). A Render Blueprint is available in [render.yaml](render.yaml) for a PostgreSQL-backed deployment.
 
-The [vercel.json](vercel.json) and [api/index.py](api/index.py) files support a lightweight Vercel demo with SQLite in `/tmp`.
+The live Vercel demo uses [vercel.json](vercel.json) and [api/index.py](api/index.py) with SQLite in `/tmp`, so `/demo` runs the full benchmark in one request for stateless hosting.
 
 For raw serverless demo JSON, use:
 
@@ -268,10 +276,3 @@ Built a FastAPI backend for evaluating tool-using AI agents across 20 simulated 
 Implemented 5 finance tools covering customer lookup, invoice inspection, usage analysis, contract terms, and invoice-vs-usage comparison, storing 100 total tool calls as auditable traces.
 Achieved 20/20 passing benchmark runs with 100% pass rate, 100/100 average evaluator score, 100% tool accuracy, 145,000 duplicate API calls detected, and $29,600 total overcharge identified.
 ```
-
-## Next Milestones
-
-- Add Alembic migrations.
-- Add React + TypeScript dashboard.
-- Add an LLM-powered agent that calls the same deterministic tools.
-- Add more business workflow scenarios.
