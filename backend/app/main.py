@@ -175,6 +175,14 @@ def run_demo() -> dict[str, object]:
         for scenario in scenarios:
             run = run_scenario(scenario.scenario_key, db)
             evaluation = run.evaluation_result
+            comparison = next(
+                (
+                    step.tool_output
+                    for step in run.steps
+                    if step.tool_name == "compare_usage_to_invoice"
+                ),
+                {},
+            )
             scenario_results.append(
                 {
                     "scenario": scenario.scenario_key,
@@ -202,6 +210,36 @@ def run_demo() -> dict[str, object]:
                         if evaluation
                         else None
                     ),
+                    "invoice": {
+                        "valid_usage_quantity": comparison.get("valid_usage_quantity"),
+                        "total_recorded_usage_quantity": comparison.get(
+                            "total_recorded_usage_quantity"
+                        ),
+                        "invoice_usage_quantity": comparison.get("invoice_usage_quantity"),
+                        "included_api_calls": comparison.get("included_api_calls"),
+                        "contract_overage_rate_cents": comparison.get(
+                            "contract_overage_rate_cents"
+                        ),
+                        "invoice_unit_price_cents": comparison.get(
+                            "invoice_unit_price_cents"
+                        ),
+                        "correct_billable_overage_calls": comparison.get(
+                            "correct_billable_overage_calls"
+                        ),
+                        "actual_charged_overage_calls": comparison.get(
+                            "actual_charged_overage_calls"
+                        ),
+                        "expected_overage_dollars": comparison.get(
+                            "expected_overage_cents", 0
+                        )
+                        / 100,
+                        "actual_overage_dollars": comparison.get(
+                            "actual_overage_cents", 0
+                        )
+                        / 100,
+                        "overcharge_dollars": comparison.get("overcharge_cents", 0)
+                        / 100,
+                    },
                     "passed": evaluation.passed if evaluation else None,
                 }
             )

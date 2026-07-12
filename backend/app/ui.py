@@ -327,6 +327,35 @@ def render_home_page() -> HTMLResponse:
         font-size: 13px;
       }
 
+      .invoice-grid {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 8px;
+      }
+
+      .invoice-cell {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 10px;
+        background: #f9fbfd;
+      }
+
+      .invoice-cell .mini-label {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 720;
+      }
+
+      .invoice-cell .mini-value {
+        display: block;
+        margin-top: 3px;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 780;
+      }
+
       .scenario-meta b {
         color: var(--ink);
         font-weight: 720;
@@ -365,6 +394,10 @@ def render_home_page() -> HTMLResponse:
         .step {
           align-items: flex-start;
           flex-direction: column;
+        }
+
+        .invoice-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
@@ -558,6 +591,40 @@ Click "Run Live Demo" to seed 20 scenarios, run the agent, evaluate each trace, 
                 <div><b>Expected ground truth:</b> ${item.expected_outcome} · ${item.expected_cause}</div>
                 <div><b>Agent result:</b> ${item.decision} · ${item.cause} · ${item.required_tools_called} tools · ${item.tool_calls_traced} traced calls</div>
                 <div><b>Detected impact:</b> ${formatter.format(item.duplicate_usage_detected)} duplicate calls · ${dollars.format(item.overcharge_detected_dollars)} overcharge</div>
+              </div>
+              <div class="invoice-grid">
+                <div class="invoice-cell">
+                  <span class="mini-label">Valid usage</span>
+                  <span class="mini-value">${formatter.format(item.invoice.valid_usage_quantity)} calls</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Invoice usage</span>
+                  <span class="mini-value">${formatter.format(item.invoice.invoice_usage_quantity)} calls</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Included allowance</span>
+                  <span class="mini-value">${formatter.format(item.invoice.included_api_calls)} calls</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Rate check</span>
+                  <span class="mini-value">${item.invoice.contract_overage_rate_cents}c contract · ${item.invoice.invoice_unit_price_cents}c invoice</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Correct overage</span>
+                  <span class="mini-value">${formatter.format(item.invoice.correct_billable_overage_calls)} calls</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Charged overage</span>
+                  <span class="mini-value">${formatter.format(item.invoice.actual_charged_overage_calls)} calls</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Expected charge</span>
+                  <span class="mini-value">${dollars.format(item.invoice.expected_overage_dollars)}</span>
+                </div>
+                <div class="invoice-cell">
+                  <span class="mini-label">Actual charge</span>
+                  <span class="mini-value">${dollars.format(item.invoice.actual_overage_dollars)}</span>
+                </div>
               </div>
             </div>
             <span class="badge">${item.score}/100</span>
