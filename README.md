@@ -1,10 +1,10 @@
 # WorkflowGym
 
-WorkflowGym is a full-stack project foundation for testing tool-using AI agents in simulated business workflows.
+WorkflowGym is a deployable benchmark for testing tool-using AI agents in simulated FinanceOps workflows.
 
 The current MVP is a backend-first FinanceOps simulator. A rule-based agent investigates 20 seeded invoice scenarios, calls deterministic finance tools, stores tool-call traces, and gets evaluated against hidden ground truth.
 
-## Resume Summary
+## Highlights
 
 WorkflowGym demonstrates:
 
@@ -15,7 +15,7 @@ WorkflowGym demonstrates:
 - Hidden-ground-truth evaluation
 - Quantified evaluation metrics: score, pass rate, tool accuracy, tool-call count, run duration, duplicate usage detected, and overcharge detected
 - Dockerized local deployment
-- API-first design ready for a future React dashboard
+- Human-friendly live demo UI
 
 ## Current Scenarios
 
@@ -234,11 +234,9 @@ Example metrics after one full benchmark run:
 }
 ```
 
-## Deployment Notes
+## Deployment
 
 The API is containerized with [backend/Dockerfile](backend/Dockerfile). A Render Blueprint is available in [render.yaml](render.yaml).
-
-The root [Dockerfile](Dockerfile) is a lightweight public-demo container for Hugging Face Spaces. It runs the same API with SQLite and auto-seeded data.
 
 The [vercel.json](vercel.json) and [api/index.py](api/index.py) files support a lightweight Vercel demo with SQLite in `/tmp`.
 
@@ -261,6 +259,15 @@ AUTO_SEED_DEMO
 The app creates tables on startup using SQLAlchemy `create_all` for the learning MVP. A production version should replace that with Alembic migrations.
 
 Set `AUTO_SEED_DEMO=true` on a demo deployment to seed the benchmark scenarios when they are missing.
+
+## Resume Bullets
+
+```text
+WorkflowGym | Tool-Using AI Agent Evaluation Platform | Python, FastAPI, SQLAlchemy, Docker, Vercel | GitHub | Live Demo
+Built a FastAPI backend for evaluating tool-using AI agents across 20 simulated FinanceOps billing scenarios with hidden ground truth, deterministic tools, trace storage, and automated scoring.
+Implemented 5 finance tools covering customer lookup, invoice inspection, usage analysis, contract terms, and invoice-vs-usage comparison, storing 100 total tool calls as auditable traces.
+Achieved 20/20 passing benchmark runs with 100% pass rate, 100/100 average evaluator score, 100% tool accuracy, 145,000 duplicate API calls detected, and $29,600 total overcharge identified.
+```
 
 ## Next Milestones
 
